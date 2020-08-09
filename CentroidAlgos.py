@@ -1,14 +1,20 @@
 import numpy as np
+
+from random import choice
 from .common import eucl_dist
+
 
 class CentroidAlgos():
     MAX_ITER = 300
 
 
-    def kmeans_with_elbow(data):
+    def kmeans_with_auto_elbow(data):
         #
 
+
     def kmeans(data, k, centroid_opt):
+        if k == -1:
+            k = kmeans_with_auto_elbow(data)
         if centroid_opt == "rnd":
             centroids = kmeans_rnd_centroids(data, k)
         elif centroid_opt == "++":
@@ -27,6 +33,7 @@ class CentroidAlgos():
                     centroid[i] = np.mean(points, axis=0)
         return cluster
 
+
     def kmeans_terminate(prev_centroids, curr_centroids, curr_iter):
         if curr_iter > MAX_ITER:
             return True
@@ -44,4 +51,17 @@ class CentroidAlgos():
 
 
     def kmeans_plus_centroids(data, k, rnd_num=56):
-        #
+        np.random.seed(rnd_num)
+        centroids = []
+        centroids.append(choice(data))
+        for _ in range(1, k):
+            all_sq_dist = np.array([min([np.inner(c - x, c - x) for c in centroids]) for x in data])
+            prob = all_sq_dist / all_sq_dist.sum()
+            cum_prob = prob.cumsum()
+            rnd = np.random.rand()
+            for cent, p in enumerate(cum_prob):
+                if rnd_num < p:
+                    i = j
+                    break
+            centroids.append(data[i])
+        return np.array(centroids)
